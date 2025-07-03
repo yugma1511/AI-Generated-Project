@@ -1,4 +1,4 @@
-# AI-Generated-Project
+# Fashion Trend Analysis-Project
 Fashion Trend Analysis in Google Sheets
 
 🧠 An innovative project using Google Apps Script and Gemini API 1.5 Flash for:
