@@ -1,0 +1,348 @@
+// ✅ Paste your API key here inside quotes
+const GEMINI_API_KEY = "AIzaSyBQbQ9tQhLO4wwv4CkErEzjZ4rgh6yXeuo";
+
+// 📊 Create Sales Chart by Category with AI Summary
+function createSalesChartAndComment() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName("SalesData");
+  if (!sheet) {
+    SpreadsheetApp.getUi().alert("Sheet 'SalesData' not found.");
+    return;
+  }
+
+  const data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 5).getValues(); // Skip header
+  const categories = {};
+
+  data.forEach(row => {
+    const category = row[1];
+    const sales = row[4];
+    if (!categories[category]) categories[category] = 0;
+    categories[category] += sales;
+  });
+
+  // Write category totals to G:H
+  sheet.getRange("G1").setValue("Category");
+  sheet.getRange("H1").setValue("Total Sales");
+
+  let i = 2;
+  for (let cat in categories) {
+    sheet.getRange(i, 7).setValue(cat);
+    sheet.getRange(i, 8).setValue(categories[cat]);
+    i++;
+  }
+
+  const chart = sheet.newChart()
+    .asColumnChart()
+    .addRange(sheet.getRange("G1:H" + (i - 1)))
+    .setPosition(2, 10, 0, 0)
+    .setTitle("Total Sales by Category")
+    .build();
+
+  sheet.insertChart(chart);
+
+  // Gemini API call to summarize
+  const prompt = `Summarize this category-wise sales data:\n\n` +
+    Object.entries(categories).map(([cat, val]) => `${cat}: ₹${val}`).join('\n');
+
+  const response = UrlFetchApp.fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + AIzaSyBQbQ9tQhLO4wwv4CkErEzjZ4rgh6yXeuo, {
+    method: "post",
+    contentType: "application/json",
+    payload: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }]
+    })
+  });
+
+  const summary = JSON.parse(response.getContentText()).candidates?.[0]?.content?.parts?.[0]?.text || "No AI summary generated.";
+
+  const insightsSheet = ss.getSheetByName("Insights") || ss.insertSheet("Insights");
+  insightsSheet.getRange("A5").setValue("📊 Sales Chart Summary:");
+  insightsSheet.getRange("A6").setValue(summary);
+}
+
+// 📊 Pie Chart by Region
+function createRegionPieChartAndComment() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName("SalesData");
+  if (!sheet) {
+    SpreadsheetApp.getUi().alert("Sheet 'SalesData' not found.");
+    return;
+  }
+
+  const data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 5).getValues();
+  const regionSales = {};
+
+  data.forEach(row => {
+    const region = row[3];
+    const sales = row[4];
+    if (!regionSales[region]) regionSales[region] = 0;
+    regionSales[region] += sales;
+  });
+
+  sheet.getRange("J1").setValue("Region");
+  sheet.getRange("K1").setValue("Total Sales");
+
+  let i = 2;
+  for (let region in regionSales) {
+    sheet.getRange(i, 10).setValue(region);
+    sheet.getRange(i, 11).setValue(regionSales[region]);
+    i++;
+  }
+
+  const chartRange = sheet.getRange(`J1:K${i - 1}`);
+  const chart = sheet.newChart()
+    .asPieChart()
+    .addRange(chartRange)
+    .setPosition(20, 1, 0, 0)
+    .setTitle("Total Sales by Region")
+    .build();
+
+  sheet.insertChart(chart);
+
+  const prompt = `Summarize this region-wise sales data:\n` +
+    Object.entries(regionSales).map(([region, sales]) => `${region}: ₹${sales}`).join("\n");
+
+  const response = UrlFetchApp.fetch(
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + AIzaSyBQbQ9tQhLO4wwv4CkErEzjZ4rgh6yXeuo,
+    {
+      method: "post",
+      contentType: "application/json",
+      payload: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }]
+      })
+    }
+  );
+
+  const summary = JSON.parse(response.getContentText()).candidates?.[0]?.content?.parts?.[0]?.text || "No AI summary found.";
+
+  const insightsSheet = ss.getSheetByName("Insights") || ss.insertSheet("Insights");
+  insightsSheet.getRange("A15").setValue("🥧 Regional Sales Summary:");
+  insightsSheet.getRange("A16").setValue(summary);
+}
+
+// ✅ Paste your API key here inside quotes
+const GEMINI_API_KEY = "AIzaSyBQbQ9tQhLO4wwv4CkErEzjZ4rgh6yXeuo";
+
+// 📊 Create Sales Chart by Category with AI Summary
+function createSalesChartAndComment() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName("SalesData");
+  if (!sheet) {
+    SpreadsheetApp.getUi().alert("Sheet 'SalesData' not found.");
+    return;
+  }
+
+  const data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 5).getValues(); // Skip header
+  const categories = {};
+
+  data.forEach(row => {
+    const category = row[1];
+    const sales = row[4];
+    if (!categories[category]) categories[category] = 0;
+    categories[category] += sales;
+  });
+
+  // Write category totals to G:H
+  sheet.getRange("G1").setValue("Category");
+  sheet.getRange("H1").setValue("Total Sales");
+
+  let i = 2;
+  for (let cat in categories) {
+    sheet.getRange(i, 7).setValue(cat);
+    sheet.getRange(i, 8).setValue(categories[cat]);
+    i++;
+  }
+
+  const chart = sheet.newChart()
+    .asColumnChart()
+    .addRange(sheet.getRange("G1:H" + (i - 1)))
+    .setPosition(2, 10, 0, 0)
+    .setTitle("Total Sales by Category")
+    .build();
+
+  sheet.insertChart(chart);
+
+  // Gemini API call to summarize
+  const prompt = `Summarize this category-wise sales data:\n\n` +
+    Object.entries(categories).map(([cat, val]) => `${cat}: ₹${val}`).join('\n');
+
+  const response = UrlFetchApp.fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + AIzaSyBQbQ9tQhLO4wwv4CkErEzjZ4rgh6yXeuo, {
+    method: "post",
+    contentType: "application/json",
+    payload: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }]
+    })
+  });
+
+  const summary = JSON.parse(response.getContentText()).candidates?.[0]?.content?.parts?.[0]?.text || "No AI summary generated.";
+
+  const insightsSheet = ss.getSheetByName("Insights") || ss.insertSheet("Insights");
+  insightsSheet.getRange("A5").setValue("📊 Sales Chart Summary:");
+  insightsSheet.getRange("A6").setValue(summary);
+}
+
+// 📊 Pie Chart by Region
+function createRegionPieChartAndComment() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName("SalesData");
+  if (!sheet) {
+    SpreadsheetApp.getUi().alert("Sheet 'SalesData' not found.");
+    return;
+  }
+
+  const data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 5).getValues();
+  const regionSales = {};
+
+  data.forEach(row => {
+    const region = row[3];
+    const sales = row[4];
+    if (!regionSales[region]) regionSales[region] = 0;
+    regionSales[region] += sales;
+  });
+
+  sheet.getRange("J1").setValue("Region");
+  sheet.getRange("K1").setValue("Total Sales");
+
+  let i = 2;
+  for (let region in regionSales) {
+    sheet.getRange(i, 10).setValue(region);
+    sheet.getRange(i, 11).setValue(regionSales[region]);
+    i++;
+  }
+
+  const chartRange = sheet.getRange(`J1:K${i - 1}`);
+  const chart = sheet.newChart()
+    .asPieChart()
+    .addRange(chartRange)
+    .setPosition(20, 1, 0, 0)
+    .setTitle("Total Sales by Region")
+    .build();
+
+  sheet.insertChart(chart);
+
+  const prompt = `Summarize this region-wise sales data:\n` +
+    Object.entries(regionSales).map(([region, sales]) => `${region}: ₹${sales}`).join("\n");
+
+  const response = UrlFetchApp.fetch(
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + AIzaSyBQbQ9tQhLO4wwv4CkErEzjZ4rgh6yXeuo,
+    {
+      method: "post",
+      contentType: "application/json",
+      payload: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }]
+      })
+    }
+  );
+
+  const summary = JSON.parse(response.getContentText()).candidates?.[0]?.content?.parts?.[0]?.text || "No AI summary found.";
+
+  const insightsSheet = ss.getSheetByName("Insights") || ss.insertSheet("Insights");
+  insightsSheet.getRange("A15").setValue("🥧 Regional Sales Summary:");
+  insightsSheet.getRange("A16").setValue(summary);
+}
+
+function translateToHindiFrenchGermanGujarati() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName("Insights");
+
+  if (!sheet) {
+    SpreadsheetApp.getUi().alert("Sheet not found.");
+    return;
+  }
+
+  const inputRange = sheet.getRange("A24:A26");
+  const texts = inputRange.getValues();
+
+  const languages = [
+    { name: "Hindi", col: 2 },
+    { name: "French", col: 3 },
+    { name: "German", col: 4 },
+    { name: "Gujarati", col: 5 }
+  ];
+
+  for (let i = 0; i < texts.length; i++) {
+    const text = texts[i][0];
+    if (!text) continue;
+
+    languages.forEach(lang => {
+      const prompt = `Translate this to ${lang.name}: ${text}`;
+      const response = UrlFetchApp.fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + GEMINI_API_KEY,
+        {
+          method: "post",
+          contentType: "application/json",
+          payload: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }]
+          })
+        }
+      );
+
+      const translated = JSON.parse(response.getContentText()).candidates?.[0]?.content?.parts?.[0]?.text || "❌ Failed";
+      sheet.getRange(i + 24, lang.col).setValue(translated);
+    });
+  }
+} // ✅ ← closing the function!
+
+function generateSalesSummaryAndPieChart() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const dataSheet = ss.getSheetByName("SalesData");
+  const summarySheet = ss.getSheetByName("Insights") || ss.insertSheet("Insights");
+
+  // Clear summary sheet
+  summarySheet.clear();
+
+  // Get all data from SalesData sheet
+  const data = dataSheet.getDataRange().getValues();
+  const headers = data[0];
+  const regionIndex = headers.indexOf("Region");
+  const salesIndex = headers.indexOf("Sales");
+
+  if (regionIndex === -1 || salesIndex === -1) {
+    SpreadsheetApp.getUi().alert("⚠️ 'Region' or 'Sales' column not found.");
+    return;
+  }
+
+  // Calculate total sales per region
+  const regionTotals = {};
+  for (let i = 1; i < data.length; i++) {
+    const region = data[i][regionIndex];
+    const sales = parseFloat(data[i][salesIndex]) || 0;
+    if (region) {
+      regionTotals[region] = (regionTotals[region] || 0) + sales;
+    }
+  }
+
+  // Write summary table
+  summarySheet.getRange("A1").setValue("Region");
+  summarySheet.getRange("B1").setValue("Total Sales");
+
+  const regions = Object.keys(regionTotals);
+  regions.forEach((region, i) => {
+    summarySheet.getRange(i + 2, 1).setValue(region); // Column A
+    summarySheet.getRange(i + 2, 2).setValue(regionTotals[region]); // Column B
+  });
+
+  const chartRange = summarySheet.getRange(1, 1, regions.length + 1, 2); // A1:B5 (if 4 regions)
+
+  // Insert Pie Chart
+  const chart = summarySheet.newChart()
+    .asPieChart()
+    .addRange(chartRange)
+    .setPosition(2, 4, 0, 0)
+    .setOption("title", "Total Sales by Region")
+    .build();
+
+  summarySheet.insertChart(chart);
+
+  SpreadsheetApp.getUi().alert("✅ Pie chart created with sales summary!");
+}
+
+function onOpen() {
+  const ui = SpreadsheetApp.getUi();
+  ui.createMenu("📊 AI Insights")
+    .addItem("Generate Trend Report", "getSalesInsights")
+    .addItem("Generate Sales Chart + Comments", "createSalesChartAndComment")
+    .addItem("Week-over-Week Comparison", "generateWeeklyComparison")
+    .addItem("Translate A24–A26 to Hindi, French, German, Gujarati", "translateA24toA26ToMultipleLanguages")
+    .addItem("Generate Region Pie Chart", "generateSalesSummaryAndPieChart")
+    .addToUi();
+}
